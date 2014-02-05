@@ -37,7 +37,9 @@ module.exports = function(grunt) {
       var content = markdown.markdown(
         grunt.file.read(src),
         options,
-        template
+        template,
+        src[0],
+        dest
       );
 
       grunt.file.write(dest, content);

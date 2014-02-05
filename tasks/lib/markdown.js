@@ -16,8 +16,9 @@ var _ = require('lodash');
 exports.init = function(grunt) {
   var exports = {};
 
-  exports.markdown = function(src, options, template) {
+  exports.markdown = function(src, options, template, srcfile, destfile) {
 
+    var resp = null;
     var html = null;
     var templateContext = null;
     var codeLines = options.codeLines;
@@ -62,7 +63,7 @@ exports.init = function(grunt) {
       }
     }
 
-    markdown.setOptions(options.markdownOptions);
+    (options.parser || markdown).setOptions(options.markdownOptions);
 
     grunt.verbose.write('Marking down...');
 
@@ -72,8 +73,19 @@ exports.init = function(grunt) {
       templateContext = options.templateContext;
     }
 
+    templateContext.src = srcfile;
+    templateContext.dest = destfile;
+
     src = options.preCompile(src, templateContext) || src;
-    html = markdown(src);
+    resp = (options.parser || markdown)(src);
+
+    if ('string' === typeof(resp)) {
+        html = resp;
+    } else {
+        html = resp.html;
+        templateContext.meta = resp.meta;
+    }
+
     html = options.postCompile(html, templateContext) || html;
 
     templateContext.content = html;
